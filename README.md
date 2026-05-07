@@ -1,2 +1,150 @@
-# digital-library-management
-A Digital Library Management System that organizes and manages books, users, and borrowing records efficiently. Enables easy searching, issuing, and returning of books with a user-friendly interface.
+<!DOCTYPE html>
+<html>
+<head>
+<title>Digital Library</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(120deg, #f6d365, #fda085);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    width: 600px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+button {
+    padding: 8px;
+    margin: 5px;
+    background: #ff7b00;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+input {
+    padding: 8px;
+    margin: 5px;
+}
+.hidden { display: none; }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>📚 Digital Library</h2>
+
+<!-- LOGIN -->
+<div id="login">
+    <button onclick="login('admin')">Admin Login</button>
+    <button onclick="login('user')">User Login</button>
+</div>
+
+<!-- ADMIN -->
+<div id="adminPanel" class="hidden">
+    <h3>Admin Panel</h3>
+    <input id="bookName" placeholder="Book Name">
+    <input id="author" placeholder="Author">
+    <button onclick="addBook()">Add Book</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<!-- USER -->
+<div id="userPanel" class="hidden">
+    <h3>User Panel</h3>
+    <input id="search" placeholder="Search" onkeyup="searchBook()">
+    <div id="bookList"></div>
+    <button onclick="logout()">Logout</button>
+</div>
+
+</div>
+
+<script>
+
+// ✅ LOAD FROM STORAGE
+let books = JSON.parse(localStorage.getItem("books")) || [];
+
+// ✅ SAVE FUNCTION
+function saveBooks() {
+    localStorage.setItem("books", JSON.stringify(books));
+}
+
+// LOGIN
+function login(type) {
+    document.getElementById("login").style.display = "none";
+
+    if(type === "admin") {
+        document.getElementById("adminPanel").classList.remove("hidden");
+    } else {
+        document.getElementById("userPanel").classList.remove("hidden");
+        displayBooks();
+    }
+}
+
+// ADD BOOK
+function addBook() {
+    let name = document.getElementById("bookName").value;
+    let author = document.getElementById("author").value;
+
+    if(name && author) {
+        books.push({name, author, issued:false});
+        saveBooks(); // 🔥 SAVE
+
+        alert("Book Added!");
+
+        document.getElementById("bookName").value = "";
+        document.getElementById("author").value = "";
+    }
+}
+
+// DISPLAY
+function displayBooks(list = books) {
+    let html = "";
+
+    list.forEach((b, i) => {
+        html += `
+        <p>
+        <b>${b.name}</b> by ${b.author} 
+        ${b.issued ? "(Issued)" : ""}
+        <button onclick="toggleIssue(${i})">
+            ${b.issued ? "Return" : "Issue"}
+        </button>
+        </p>`;
+    });
+
+    document.getElementById("bookList").innerHTML = html;
+}
+
+// ISSUE / RETURN
+function toggleIssue(i) {
+    books[i].issued = !books[i].issued;
+    saveBooks(); // 🔥 SAVE
+    displayBooks();
+}
+
+// SEARCH
+function searchBook() {
+    let text = document.getElementById("search").value.toLowerCase();
+
+    let filtered = books.filter(b =>
+        b.name.toLowerCase().includes(text)
+    );
+
+    displayBooks(filtered);
+}
+
+// LOGOUT
+function logout() {
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>
